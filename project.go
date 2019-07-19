@@ -53,7 +53,7 @@ type Project struct {
 	AvatarUrls      AvatarUrls         `json:"avatarUrls,omitempty" structs:"avatarUrls,omitempty"`
 	ProjectCategory ProjectCategory    `json:"projectCategory,omitempty" structs:"projectCategory,omitempty"`
 	ProjectTypeKey  string    	   `json:"projectTypeKey,omitempty" structs:"projectTypeKey,omitempty"`
-	ProjectLead            string      `json:"lead,omitempty" structs:"lead,omitempty"`
+	ProjectLead            string      `json:"lead,omitempty"`
 }
 
 // ProjectComponent represents a single component of a project
