@@ -1,9 +1,10 @@
 package jira
 
 import (
+	"encoding/json"
 	"fmt"
-
 	"github.com/google/go-querystring/query"
+	"io/ioutil"
 )
 
 // ProjectService handles projects for the JIRA instance / API.
@@ -51,27 +52,18 @@ type Project struct {
 	Name            string             `json:"name,omitempty" structs:"name,omitempty"`
 	Roles           map[string]string  `json:"roles,omitempty" structs:"roles,omitempty"`
 	AvatarUrls      AvatarUrls         `json:"avatarUrls,omitempty" structs:"avatarUrls,omitempty"`
-	ProjectCategory ProjectCategory    `json:"projectCategory,omitempty" structs:"projectCategory,omitempty"`	
+	ProjectCategory ProjectCategory    `json:"projectCategory,omitempty" structs:"projectCategory,omitempty"`
 }
 
 // CreateProject represents a JIRA CreateProject Struct.
 type CreateProject struct {
-	Expand      string `json:"expand,omitempty" structs:"expand,omitempty"`
-	Self        string `json:"self,omitempty" structs:"self,omitempty"`
-	ID          string `json:"id,omitempty" structs:"id,omitempty"`
-	Key         string `json:"key,omitempty" structs:"key,omitempty"`
-	Description string `json:"description,omitempty" structs:"description,omitempty"`	
-	Components   []ProjectComponent `json:"components,omitempty" structs:"components,omitempty"`
-	IssueTypes   []IssueType        `json:"issueTypes,omitempty" structs:"issueTypes,omitempty"`
-	URL          string             `json:"url,omitempty" structs:"url,omitempty"`
-	Email        string             `json:"email,omitempty" structs:"email,omitempty"`
-	AssigneeType string             `json:"assigneeType,omitempty" structs:"assigneeType,omitempty"`
-	Versions     []Version          `json:"versions,omitempty" structs:"versions,omitempty"`
-	Name         string             `json:"name,omitempty" structs:"name,omitempty"`
-	Roles        map[string]string  `json:"roles,omitempty" structs:"roles,omitempty"`
-	ProjectCategory ProjectCategory `json:"projectCategory,omitempty" structs:"projectCategory,omitempty"`
-	ProjectTypeKey  string          `json:"projectTypeKey,omitempty" structs:"projectTypeKey,omitempty"`
-	Lead            string          `json:"lead,omitempty" structs:"lead,omitempty"`
+	Self           string      `json:"self,omitempty" structs:"self,omitempty"`
+	ID             json.Number `json:"id,omitempty" structs:"id,omitempty"`
+	Key            string      `json:"key,omitempty" structs:"key,omitempty"`
+	Description    string      `json:"description,omitempty" structs:"description,omitempty"`
+	Name           string      `json:"name,omitempty" structs:"name,omitempty"`
+	ProjectTypeKey string      `json:"projectTypeKey,omitempty" structs:"projectTypeKey,omitempty"`
+	Lead           string      `json:"lead,omitempty" structs:"lead,omitempty"`
 }
 
 // ProjectComponent represents a single component of a project
@@ -179,3 +171,31 @@ func (s *ProjectService) GetPermissionScheme(projectID string) (*PermissionSchem
 
 	return ps, resp, nil
 }
+
+// JIRA API docs: https://docs.atlassian.com/jira/REST/latest/#api/2/issue-createProject
+func (s *ProjectService) Create(project *CreateProject) (*CreateProject, *Response, error) {
+	apiEndpoint := "rest/api/2/project"
+	req, err := s.client.NewRequest("POST", apiEndpoint, project)
+	if err != nil {
+		return nil, nil, err
+	}
+	resp, err := s.client.Do(req, nil)
+	if err != nil {
+		// incase of error return the resp for further inspection
+		return nil, resp, err
+	}
+
+	responseProject := new(CreateProject)
+	defer resp.Body.Close()
+	data, readErr := ioutil.ReadAll(resp.Body)
+	if readErr != nil {
+		return nil, resp, readErr
+	}
+	unmarshalErr := json.Unmarshal(data, responseProject)
+	if unmarshalErr != nil {
+		//return nil, resp, fmt.Errorf("Could not unmarshall the data into struct")
+		return nil, resp, unmarshalErr
+	}
+	return responseProject, resp, nil
+}
+
