@@ -41,7 +41,7 @@ type Project struct {
 	ID              string             `json:"id,omitempty" structs:"id,omitempty"`
 	Key             string             `json:"key,omitempty" structs:"key,omitempty"`
 	Description     string             `json:"description,omitempty" structs:"description,omitempty"`
-	Lead            User               `json:"lead,omitempty" structs:"lead,omitempty"`
+	Lead            User               `json:"leadDetails,omitempty" structs:"leadDetails,omitempty"`
 	Components      []ProjectComponent `json:"components,omitempty" structs:"components,omitempty"`
 	IssueTypes      []IssueType        `json:"issueTypes,omitempty" structs:"issueTypes,omitempty"`
 	URL             string             `json:"url,omitempty" structs:"url,omitempty"`
@@ -53,6 +53,7 @@ type Project struct {
 	AvatarUrls      AvatarUrls         `json:"avatarUrls,omitempty" structs:"avatarUrls,omitempty"`
 	ProjectCategory ProjectCategory    `json:"projectCategory,omitempty" structs:"projectCategory,omitempty"`
 	ProjectTypeKey  string    	   `json:"projectTypeKey,omitempty" structs:"projectTypeKey,omitempty"`
+	ProjectLead            string      `json:"lead,omitempty" structs:"lead,omitempty"`
 }
 
 // ProjectComponent represents a single component of a project
